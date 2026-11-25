@@ -45,7 +45,10 @@ def main():
                cpwer=float(agg.errors) / length * 100,
                sub=float(agg.substitutions) / length * 100,
                del_=float(agg.deletions) / length * 100,
-               ins=float(agg.insertions) / length * 100)
+               ins=float(agg.insertions) / length * 100,
+               errors=float(agg.errors),
+               sub_n=float(agg.substitutions), del_n=float(agg.deletions),
+               ins_n=float(agg.insertions))
     if args.json:
         print(json.dumps(res))
     else:

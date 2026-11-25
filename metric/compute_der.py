@@ -29,8 +29,15 @@ def main():
     ap.add_argument('--json', action='store_true')
     args = ap.parse_args()
 
+    from pyannote.core import Annotation
     from pyannote.database.util import load_rttm
     from pyannote.metrics.diarization import DiarizationErrorRate
+
+    def load_ann(path, uri):
+        d = load_rttm(path)
+        if uri in d:
+            return d[uri]
+        return next(iter(d.values())) if d else Annotation(uri=uri)
 
     refs = {os.path.splitext(os.path.basename(p))[0]: p
             for p in glob.glob(os.path.join(args.ref_dir, 'rttm', '*.rttm'))}
@@ -42,8 +49,7 @@ def main():
     for collar in args.collars:
         metric = DiarizationErrorRate(collar=collar, skip_overlap=False)
         for aid in ids:
-            metric(next(iter(load_rttm(refs[aid]).values())),
-                   next(iter(load_rttm(hyps[aid]).values())))
+            metric(load_ann(refs[aid], aid), load_ann(hyps[aid], aid))
         c = dict(metric[:])
         total = float(c['total']) or 1.0
         miss, fa, conf = (float(c['missed detection']), float(c['false alarm']),
@@ -51,7 +57,8 @@ def main():
         out.append(dict(collar=collar,
                         der=(miss + fa + conf) / total * 100,
                         miss=miss / total * 100, fa=fa / total * 100,
-                        conf=conf / total * 100))
+                        conf=conf / total * 100,
+                        total_s=total, miss_s=miss, fa_s=fa, conf_s=conf))
 
     if args.json:
         print(json.dumps(out))

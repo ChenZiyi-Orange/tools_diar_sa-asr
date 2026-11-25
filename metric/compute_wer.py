@@ -53,7 +53,8 @@ def main():
     n_ = n or 1
     res = dict(utts=len(ids), n=n,
                wer=(sub + dele + ins) / n_ * 100,
-               sub=sub / n_ * 100, del_=dele / n_ * 100, ins=ins / n_ * 100)
+               sub=sub / n_ * 100, del_=dele / n_ * 100, ins=ins / n_ * 100,
+               sub_n=sub, del_n=dele, ins_n=ins)
     if args.json:
         print(json.dumps(res))
     else:
